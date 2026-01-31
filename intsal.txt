@@ -1,0 +1,3 @@
+ uv venv  
+ uv pip install aamad
+ uv run aamad init  
