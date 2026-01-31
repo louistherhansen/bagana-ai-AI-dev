@@ -11,6 +11,117 @@ This System Architecture Document (SAD) defines the architecture for BAGANA AI�
 
 ---
 
+## Stakeholders and Concerns
+
+| Stakeholder | Role | Primary concerns |
+|-------------|------|-------------------|
+| **Agency PM / Product Manager** | End user, document creator | Time-to-first-PRD, completeness of PRD/MRD, ease of use, export quality |
+| **Agency Executive / Account Director** | Reviewer, approver | Quick review, executive summary, dashboard, document quality |
+| **Development team** | Implementers | Clear structure, testability, CI/CD, maintainability, tech stack clarity |
+| **Operations / DevOps** | Deploy and run | Deployment simplicity, monitoring, cost, availability, secrets management |
+| **Product owner** | Scope and roadmap | MVP vs. Phase 2 scope, product–market fit, beta feedback |
+| **Compliance / Legal** | Governance | Data privacy (GDPR), auditability, retention, consent |
+
+*Correspondence*: PRD §§2 (user personas), §4 (functional requirements); MRD (market and technical feasibility). Concerns drive quality attributes and constraints below.
+
+---
+
+## Architectural Views (ISO/IEC/IEEE 42010)
+
+### Logical View (primary presentation)
+
+**Elements**: Next.js app (App Router, API routes), assistant-ui (chat UI), CrewAI Python layer (agents, tasks, tools), Prisma/DB (Users, Sessions, Documents, DocumentVersions, Messages), LLM provider (OpenAI/Anthropic).
+
+**Relations**: Browser ↔ Next.js (HTTPS); Next.js API ↔ CrewAI layer (subprocess or HTTP); Next.js ↔ DB (Prisma); CrewAI ↔ LLM API. Templates and config (YAML) read by CrewAI.
+
+**Rationale**: Separation of UI (Next.js + assistant-ui), orchestration (CrewAI), and persistence (DB) keeps concerns clear and allows swapping LLM or DB without changing chat UX.
+
+### Process / Runtime View
+
+**Elements**: User request → Next.js API route → validation → (load session/messages from DB) → invoke CrewAI → stream chunks → Next.js streams to client → assistant-ui updates thread. Optional: Validation agent runs after document task; output written to DB.
+
+**Rationale**: Single-threaded request per user message; streaming keeps latency perceived low; no long-lived background processes in MVP.
+
+### Deployment View
+
+**Elements**: AWS App Runner (one or more instances); container runs Next.js + Node; optional sidecar or second service for Python CrewAI; SQLite file or external DB; env/secrets from App Runner or Secrets Manager; GitHub Actions builds and deploys.
+
+**Rationale**: App Runner gives simple scale and HTTPS; single region for MVP; staging and production as separate services or branches.
+
+### Data View
+
+**Elements**: Users, Sessions, Documents, DocumentVersions, Messages (see §4 Database). Data flow: auth creates/updates User; chat creates Session and Messages; document creation/update writes Documents and DocumentVersions; export reads DocumentVersions.
+
+**Rationale**: Schema supports multi-turn chat, document history, and future PostgreSQL; minimal PII; retention and auditability via timestamps and optional audit log.
+
+*Correspondence rules*: Logical view components map to Process view (API route, CrewAI, DB); Process view maps to Deployment (one or more containers); Data view is implemented by DB in Deployment.
+
+---
+
+## Quality Attributes
+
+| Attribute | Priority | Scenario / target | Approach in SAD |
+|-----------|----------|--------------------|-----------------|
+| **Performance** | High | Chat first response &lt;3s p95; full PRD &lt;30s | §7; streaming; bounded task time; caching |
+| **Usability** | High | Time-to-first-PRD &lt;1 hour; WCAG 2.1 AA | §3 UI; assistant-ui; onboarding; accessibility |
+| **Security** | High | Auth, no leakage of others’ data, secrets in env | §4 Auth, §8 Security; NextAuth; RBAC on documents |
+| **Availability** | Medium | MVP single instance; production 99.9% target | §5 Deployment; health check; scaling; backup |
+| **Modifiability** | High | Add agents, change templates, swap LLM | YAML config; adapter pattern; stateless API |
+| **Testability** | High | Unit, integration, E2E in CI | §9 Testing; mocks for CrewAI/DB; Playwright |
+| **Scalability** | Medium (post-MVP) | Hundreds of concurrent users; PostgreSQL | §7; horizontal scaling; DB migration path |
+| **Compliance** | Medium | GDPR, retention, audit | §8 Data privacy; retention; audit log |
+
+*Traceability*: PRD NFRs (§5–6), MRD technical implications.
+
+---
+
+## Architectural Decisions (summary)
+
+| Decision | Rationale |
+|----------|------------|
+| Next.js App Router | Server Components, streaming, layout; better fit than Pages Router for chat + data. |
+| assistant-ui for chat | Production-grade LLM UX (streaming, tools); reduces custom chat bugs. |
+| CrewAI + YAML config | AAMAD adapter; agents/tasks externalized; no inline definitions. |
+| MVP: 1–2 agents, PRD-only | Validate pipeline and time-to-value before full 5-agent crew (MRD). |
+| SQLite → PostgreSQL | Zero-config MVP; schema and Prisma ready for multi-instance later. |
+| NextAuth | Standard auth for Next.js; OAuth + credentials; session in DB or JWT. |
+| GitHub Actions → App Runner | CI/CD from day 1; single pipeline; versioned deployments. |
+| Streaming for all chat/PRD output | Keeps perceived latency low; no full-buffer before first byte. |
+
+*Detailed decisions*: §1 Technical Architecture Decisions; §2 CrewAI; §4–5 Backend and DevOps.
+
+---
+
+## Constraints
+
+| Type | Constraint |
+|------|------------|
+| **Technical** | AAMAD_ADAPTER=crewai for this release; agents/tasks must be loadable from YAML per adapter-crewai. |
+| **Technical** | Next.js and assistant-ui chosen by Phase 3 template; no swap without template change. |
+| **Business** | MVP scope: PRD-only, single-user; no MRD, no collaboration, no enterprise SSO in MVP. |
+| **Resource** | MVP: single region, SQLite, tens of concurrent users; scale and budget per §5–7. |
+| **Regulatory** | GDPR-aware (retention, deletion, consent); no HIPAA/FedRAMP in MVP unless required later. |
+| **PRD** | Chat &lt;3s, PRD &lt;30s, export &lt;10s; 90% document completeness target (PRD §4–5). |
+
+*Traceability*: PRD §3–5; MRD recommendations; usecase.txt.
+
+---
+
+## Risks
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|-------------|
+| **LLM API outage or rate limit** | Medium | High (core path blocked) | Retry with backoff; clear user error; optional multi-provider fallback (Phase 2). |
+| **CrewAI orchestration complexity** | Medium | Medium (delays, bugs) | MVP limited to 1–2 agents; YAML and tests; phased rollout. |
+| **Python–Node integration brittle** | Medium | Medium (streaming/errors) | Define contract (stdin/stdout or HTTP); integration tests; document in Open Questions. |
+| **Low adoption / poor fit** | Medium | High | Beta with clear success criteria; time-to-first-PRD and NPS; iterate from feedback. |
+| **Security or data breach** | Low | High | NextAuth; no secrets in code; rate limit; audit log; incident procedure (§8). |
+| **Cost overrun (LLM/infra)** | Medium | Medium | Target &lt;$2/document; monitor usage; token limits and caching. |
+
+*Traceability*: MRD Risk Assessment Matrix; PRD §9 Risk Mitigation.
+
+---
+
 ## 1. MVP Architecture Philosophy & Principles
 
 ### MVP Design Principles
@@ -350,6 +461,24 @@ This System Architecture Document (SAD) defines the architecture for BAGANA AI�
 - [x] CI/CD and deployment (GitHub Actions, App Runner) specified.
 - [x] Monitoring and feedback strategy defined.
 - [x] Path from MVP to full production (PostgreSQL, more agents, dashboard) indicated.
+
+---
+
+## SAD Completeness Validation (ISO/IEC/IEEE 42010)
+
+Validated against system-arch persona and ISO 42010: stakeholders/concerns, views, quality attributes, decisions, constraints, and risks.
+
+| Element | Status | Location in SAD |
+|--------|--------|------------------|
+| **Stakeholders and concerns** | ✅ Complete | Section "Stakeholders and Concerns" — Agency PM, Executive, Dev, Ops, Product owner, Compliance; concerns and correspondence to PRD/MRD. |
+| **Views** | ✅ Complete | Section "Architectural Views" — Logical (components, relations, rationale), Process/Runtime (request flow), Deployment (App Runner, CI/CD), Data (models, flow); correspondence rules stated. |
+| **Quality attributes** | ✅ Complete | Section "Quality Attributes" — Performance, Usability, Security, Availability, Modifiability, Testability, Scalability, Compliance with priorities and traceability. |
+| **Architectural decisions** | ✅ Complete | Section "Architectural Decisions (summary)" plus §1 Technical Architecture Decisions; rationale and traceability. |
+| **Constraints** | ✅ Complete | Section "Constraints" — Technical (AAMAD adapter, YAML), Business (MVP scope), Resource, Regulatory, PRD-derived. |
+| **Risks** | ✅ Complete | Section "Risks" — LLM, orchestration, Python–Node, adoption, security, cost; likelihood/impact and mitigation; traceability to MRD/PRD. |
+| **Traceability to PRD** | ✅ Complete | Stakeholders, quality attributes, constraints, and risks reference PRD §§2–5, §9; Validation Checklist and Audit. |
+
+**Outcome**: SAD is complete for stakeholders/concerns, views, quality attributes, decisions, constraints, and risks. Rationales and correspondence rules align with SEI Views and Beyond and ISO 42010.
 
 ---
 
