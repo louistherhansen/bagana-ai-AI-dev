@@ -49,7 +49,7 @@ For detailed requirements and specifications, see the [Product Requirements Docu
 
 - ✅ **PRD Created**: [Product Requirements Document](./project-context/1.define/prd.md)
 - ✅ **MRD Created**: [Market Research Document](./project-context/1.define/mrd.md)
-- ⏳ **Architecture**: Solution Architecture Document (SAD) — pending
+- ✅ **SAD Created**: [System Architecture Document](./project-context/1.define/sad.md)
 - ⏳ **Development**: Build phase (pending)
 
 ---
@@ -120,7 +120,8 @@ flowchart LR
     ├─ project-context/
     │ ├─ 1.define/ # Project-specific PRD, MRD, SAD, research reports, etc.
     │ │   ├─ prd.md # ✅ BAGANA AI Product Requirements Document
-    │ │   └─ mrd.md # ✅ Market Research Document
+    │ │   ├─ mrd.md # ✅ Market Research Document
+    │ │   └─ sad.md # ✅ System Architecture Document
     │ ├─ 2.build/ # Output artifacts for setup, frontend, backend, etc.
     │ └─ 3.deliver/ # QA logs, deploy configs, release notes, etc.
     ├─ CHECKLIST.md # Step-by-step execution guide
@@ -183,12 +184,13 @@ The Product Manager persona (`@product-mgr`) conducts prompt-driven discovery an
 
 - ✅ **Requirements:** [Product Requirements Document (PRD)](./project-context/1.define/prd.md)
 - ✅ **Market Research:** [Market Research Document (MRD)](./project-context/1.define/mrd.md) — template: `.cursor/templates/mr-template.md`
+- ✅ **Architecture:** [System Architecture Document (SAD)](./project-context/1.define/sad.md) — template: `.cursor/templates/sad-template.md`
 - ⏳ **Context Summary:** Create comprehensive context handoff artifacts for technical teams
 - ⏳ **Validation:** Ensure completeness of market analysis, user personas, feature requirements, and success metrics
 
 Phase 1 outputs are stored in `project-context/1.define/` and provide the foundation for all subsequent development phases.
 
-**Current Status:** PRD and MRD completed. Ready to create SAD or begin Phase 2 (Build).
+**Current Status:** PRD, MRD, and SAD completed. Ready to begin Phase 2 (Build).
 
 ---
 
@@ -245,6 +247,7 @@ Licensed under Apache License 2.0.
 
 - 📋 [Product Requirements Document (PRD)](./project-context/1.define/prd.md) — Product specifications
 - 📊 [Market Research Document (MRD)](./project-context/1.define/mrd.md) — Market and opportunity analysis
+- 🏗️ [System Architecture Document (SAD)](./project-context/1.define/sad.md) — Architecture and technical blueprint
 - 📝 [Use Case](./usecase.txt) — Project use case definition
 - ✅ [Checklist](./CHECKLIST.md) — Step-by-step execution guide
 - 📚 [AAMAD Templates](./.cursor/templates/) — Framework templates (PRD, MR, SAD, etc.)
