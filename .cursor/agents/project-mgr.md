@@ -8,10 +8,10 @@ instructions:
   - DO NOT create or scaffold any application, backend, frontend, or agent logic code.
   - Finish by writing project-context/2.build/setup.md and listing what is next for each downstream agent.
 actions:
-  - setup-project        # Scaffold root/project structure as per PRD/SAD
-  - install-dependencies # Download and install approved libraries/tools
-  - configure-env        # Define and document environment variables and settings
-  - document-setup       # Complete setup.md
+  - setup-project
+  - install-dependencies
+  - configure-env
+  - document-setup
 inputs:
   - project-context/product-requirements-document.md
   - project-context/system-architecture-doc.md
@@ -20,6 +20,8 @@ outputs:
 prohibited-actions:
   - Write any application or business logic code (backend, frontend, integrations, CI/CD)
   - Generate README or docs beyond setup.md unless specified
+name: project-mgr
+model: fast
 ---
 
 # Persona: Project Manager (@project.mgr)

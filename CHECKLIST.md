@@ -27,7 +27,7 @@ This checklist guides you step-by-step through running AAMAD from Phase 1 (Defin
   - [ ] agents/ (with all persona .md files)
   - [ ] rules/, prompts/, templates/ folders as provided
   - [ ] epics.md and personas.md reference files
-- [ ] Add "AAMAD_ADAPTER=crewai" to your environment variables (current default multiagent system framework)
+- [x] Add "AAMAD_ADAPTER=crewai" to your environment variables (current default multiagent system framework) — see README "Getting Started" for details
 
 ---
 

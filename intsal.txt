@@ -5,3 +5,4 @@
 PRD :
  @.cursor/agents/product-mgr.md *create-prd and use templete @.cursor/templates/prd-template.md and usecase @usecase.txt 
 
+@.cursor/agents/product-mgr.md *create-sad use the templete @.cursor/templates/sad-template.md  and review @project-context/1.define/prd.md , @project-context/1.define/mrd.md and @usecase.txt 

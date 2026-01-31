@@ -39,7 +39,7 @@ BAGANA AI is designed to solve the critical pain point agencies face when creati
 - Agency Executives and Account Directors
 - Client Stakeholders and External Collaborators
 
-For detailed requirements and specifications, see the [Product Requirements Document](./project-context/1.define/prd.md).
+For detailed requirements and specifications, see the [Product Requirements Document](./project-context/1.define/prd.md) and [Market Research Document](./project-context/1.define/mrd.md).
 
 ---
 
@@ -47,9 +47,9 @@ For detailed requirements and specifications, see the [Product Requirements Docu
 
 **Current Phase:** Phase 1 - Define ✅
 
-- ✅ **PRD Created**: Complete Product Requirements Document available in `project-context/1.define/prd.md`
-- ⏳ **MRD**: Market Research Document (pending)
-- ⏳ **Architecture**: Solution Architecture Document (pending)
+- ✅ **PRD Created**: [Product Requirements Document](./project-context/1.define/prd.md)
+- ✅ **MRD Created**: [Market Research Document](./project-context/1.define/mrd.md)
+- ⏳ **Architecture**: Solution Architecture Document (SAD) — pending
 - ⏳ **Development**: Build phase (pending)
 
 ---
@@ -118,8 +118,9 @@ flowchart LR
     │ ├─ rules/ # Architecture, workflow, and epics rules/patterns
     │ └─ templates/ # Generation templates for research, PRD, SAD, etc.
     ├─ project-context/
-    │ ├─ 1.define/ # Project-specific PRD, SAD, research reports, etc.
-    │ │   └─ prd.md # ✅ BAGANA AI Product Requirements Document
+    │ ├─ 1.define/ # Project-specific PRD, MRD, SAD, research reports, etc.
+    │ │   ├─ prd.md # ✅ BAGANA AI Product Requirements Document
+    │ │   └─ mrd.md # ✅ Market Research Document
     │ ├─ 2.build/ # Output artifacts for setup, frontend, backend, etc.
     │ └─ 3.deliver/ # QA logs, deploy configs, release notes, etc.
     ├─ CHECKLIST.md # Step-by-step execution guide
@@ -155,9 +156,17 @@ flowchart LR
    uv run aamad init
    ```
 
-3. **Review the PRD**: Start by reading the [Product Requirements Document](./project-context/1.define/prd.md) to understand the project scope and requirements.
+3. **Set environment variables.**  
+   Create a `.env` (or export in your shell) with at least:
+   ```bash
+   # Current default multi-agent framework adapter (see .cursor/rules/adapter-registry.mdc)
+   AAMAD_ADAPTER=crewai
+   ```
+   The orchestrator loads `.cursor/rules/adapter-${AAMAD_ADAPTER}.mdc`; if unset, it defaults to `crewai`. Add other variables (e.g. LLM API keys) as required by the SAD/PRD.
 
-4. **Follow the Development Workflow**: Use `CHECKLIST.md` to guide multi-agent development phases.
+4. **Review the PRD**: Start by reading the [Product Requirements Document](./project-context/1.define/prd.md) to understand the project scope and requirements.
+
+5. **Follow the Development Workflow**: Use `CHECKLIST.md` to guide multi-agent development phases.
 
 ### Development Workflow
 
@@ -172,14 +181,14 @@ flowchart LR
 
 The Product Manager persona (`@product-mgr`) conducts prompt-driven discovery and context setup to standardize project scoping:
 
-- ✅ **Requirements:** Product Requirements Document (PRD) - [View PRD](./project-context/1.define/prd.md)
-- ⏳ **Market Research:** Generate Market Research Document (MRD) using `.cursor/templates/mrd-template.md`
+- ✅ **Requirements:** [Product Requirements Document (PRD)](./project-context/1.define/prd.md)
+- ✅ **Market Research:** [Market Research Document (MRD)](./project-context/1.define/mrd.md) — template: `.cursor/templates/mr-template.md`
 - ⏳ **Context Summary:** Create comprehensive context handoff artifacts for technical teams
 - ⏳ **Validation:** Ensure completeness of market analysis, user personas, feature requirements, and success metrics
 
 Phase 1 outputs are stored in `project-context/1.define/` and provide the foundation for all subsequent development phases.
 
-**Current Status:** PRD completed. Ready to proceed to MRD creation or begin Phase 2 (Build) with existing PRD.
+**Current Status:** PRD and MRD completed. Ready to create SAD or begin Phase 2 (Build).
 
 ---
 
@@ -234,14 +243,15 @@ Licensed under Apache License 2.0.
 
 ## Quick Links
 
-- 📋 [Product Requirements Document (PRD)](./project-context/1.define/prd.md) - Complete product specifications
-- 📝 [Use Case](./usecase.txt) - Project use case definition
-- ✅ [Checklist](./CHECKLIST.md) - Step-by-step execution guide
-- 📚 [AAMAD Templates](./.cursor/templates/) - Framework templates
-- 👥 [Agent Personas](./.cursor/agents/) - Agent definitions
+- 📋 [Product Requirements Document (PRD)](./project-context/1.define/prd.md) — Product specifications
+- 📊 [Market Research Document (MRD)](./project-context/1.define/mrd.md) — Market and opportunity analysis
+- 📝 [Use Case](./usecase.txt) — Project use case definition
+- ✅ [Checklist](./CHECKLIST.md) — Step-by-step execution guide
+- 📚 [AAMAD Templates](./.cursor/templates/) — Framework templates (PRD, MR, SAD, etc.)
+- 👥 [Agent Personas](./.cursor/agents/) — Agent definitions
 
 ---
 
-> For detailed step-by-step Phase 2 execution, see [CHECKLIST.md].  
+> For detailed step-by-step Phase 2 execution, see [CHECKLIST.md](./CHECKLIST.md).  
 > For advanced reference and prompt engineering, see `.cursor/templates/` and `.cursor/rules/`.
 
